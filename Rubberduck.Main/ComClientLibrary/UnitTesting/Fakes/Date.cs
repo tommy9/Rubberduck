@@ -3,22 +3,22 @@ using System.Runtime.InteropServices;
 
 namespace Rubberduck.UnitTesting.Fakes
 {
-    internal class Now : FakeBase
+    internal class Date : FakeBase
     {
-        private static readonly IntPtr ProcessAddress = EasyHook.LocalHook.GetProcAddress(TargetLibrary, "rtcGetPresentDate");
+        private static readonly IntPtr ProcessAddress = EasyHook.LocalHook.GetProcAddress(TargetLibrary, "rtcGetDateVar");
 
-        public Now()
+        public Date()
         {
-            InjectDelegate(new NowDelegate(NowCallback), ProcessAddress);
+            InjectDelegate(new DateDelegate(DateCallback), ProcessAddress);
         }
 
         [DllImport(TargetLibrary, SetLastError = true)]
-        private static extern void rtcGetPresentDate(out object retVal);
+        private static extern void rtcGetDateVar(out object retVal);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
-        private delegate void NowDelegate(IntPtr retVal);
+        private delegate void DateDelegate(IntPtr retVal);
 
-        public void NowCallback(IntPtr retVal)
+        public void DateCallback(IntPtr retVal)
         {
             OnCallBack(true);
             if (!TrySetReturnValue())                          // specific invocation
@@ -28,7 +28,7 @@ namespace Rubberduck.UnitTesting.Fakes
             if (PassThrough)
             {
                 object result;
-                rtcGetPresentDate(out result);
+                rtcGetDateVar(out result);
                 Marshal.GetNativeVariantForObject(result, retVal);
                 return;
             }
